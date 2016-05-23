@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 the original author or authors.
+ * Copyright 2012 - 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.Map;
 import org.apache.solr.client.solrj.beans.Field;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
@@ -124,6 +123,10 @@ public class MappingSolrConvertDocumentObjectBinderCompatibilityTests {
 		Assert.assertEquals("CCTV Store", supplierTwo.get(0));
 	}
 
+	/**
+	 * @see DATASOLR-87
+	 * @see DATASOLR-309
+	 */
 	@Test
 	public void testToAndFromSolrDocument() {
 		Item item = new Item();
@@ -146,7 +149,7 @@ public class MappingSolrConvertDocumentObjectBinderCompatibilityTests {
 		converter.write(item, doc);
 
 		SolrDocumentList docs = new SolrDocumentList();
-		docs.add(ClientUtils.toSolrDocument(doc));
+		docs.add(toSolrDocument(doc));
 		Item out = converter.read(Item.class, docs.get(0));
 
 		// make sure it came out the same
@@ -166,7 +169,8 @@ public class MappingSolrConvertDocumentObjectBinderCompatibilityTests {
 		converter.write(out, doc1);
 
 		SolrDocumentList docs1 = new SolrDocumentList();
-		docs1.add(ClientUtils.toSolrDocument(doc1));
+		SolrDocument sd = new SolrDocument();
+		docs1.add(toSolrDocument(doc1));
 		Item out1 = converter.read(Item.class, docs1.get(0));
 
 		Assert.assertEquals(item.id, out1.id);
@@ -184,30 +188,38 @@ public class MappingSolrConvertDocumentObjectBinderCompatibilityTests {
 		return converter.read(solDocList, Item.class);
 	}
 
+	public static SolrDocument toSolrDocument(SolrInputDocument d) {
+		SolrDocument doc = new SolrDocument();
+		for (SolrInputField field : d) {
+			doc.setField(field.getName(), field.getValue());
+		}
+		return doc;
+	}
+
 	public static class Item {
 		@Field String id;
 
-		@Field("cat")//
+		@Field("cat") //
 		String[] categories;
 
-		@Field//
+		@Field //
 		List<String> features;
 
-		@Field//
+		@Field //
 		Date timestamp;
 
-		@Field("highway_mileage")//
+		@Field("highway_mileage") //
 		int mwyMileage;
 
 		boolean inStock;
 
-		@Field("supplier_*")//
+		@Field("supplier_*") //
 		Map<String, List<String>> supplier;
 
-		@Field("sup_simple_*")//
+		@Field("sup_simple_*") //
 		Map<String, String> supplier_simple;
 
-		@Indexed(readonly = true)//
+		@Indexed(readonly = true) //
 		private String[] allSuppliers;
 
 		@Field("supplier_*")
@@ -231,10 +243,10 @@ public class MappingSolrConvertDocumentObjectBinderCompatibilityTests {
 	}
 
 	public static class NotGettableItem {
-		@Field//
+		@Field //
 		String id;
 
-		@SuppressWarnings("unused")//
+		@SuppressWarnings("unused") //
 		private boolean inStock;
 
 		private String aaa;
@@ -254,8 +266,7 @@ public class MappingSolrConvertDocumentObjectBinderCompatibilityTests {
 		}
 	}
 
-	public static final String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			+ "<response>"
+	public static final String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<response>"
 			+ "<lst name=\"responseHeader\"><int name=\"status\">0</int><int name=\"QTime\">0</int><lst name=\"params\"><str name=\"start\">0</str><str name=\"q\">*:*\n"
 			+ "</str><str name=\"version\">2.2</str><str name=\"rows\">4</str></lst></lst><result name=\"response\" numFound=\"26\" start=\"0\"><doc><arr name=\"cat\">"
 			+ "<str>electronics</str><str>hard drive</str></arr><arr name=\"features\"><str>7200RPM, 8MB cache, IDE Ultra ATA-133</str>"

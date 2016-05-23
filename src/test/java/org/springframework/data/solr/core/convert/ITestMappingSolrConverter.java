@@ -152,6 +152,7 @@ public class ITestMappingSolrConverter extends AbstractITestWithEmbeddedSolrServ
 
 	/**
 	 * @see DATASOLR-210
+	 * @see DATASOLR-309
 	 */
 	@Test
 	public void testProcessesScoreCorrectly() {
@@ -170,11 +171,12 @@ public class ITestMappingSolrConverter extends AbstractITestWithEmbeddedSolrServ
 
 		List<BeanWithScore> content = page.getContent();
 		assertEquals(3, page.getTotalElements());
-		assertEquals(Float.valueOf(0.9105287f), content.get(0).score);
+
+		assertEquals(Float.valueOf(0.98382175F), content.get(0).score);
 		assertEquals("spring data solr", content.get(0).description);
-		assertEquals(Float.valueOf(0.45526436f), content.get(1).score);
+		assertEquals(Float.valueOf(0.87138504F), content.get(1).score);
 		assertEquals("spring", content.get(1).description);
-		assertEquals(Float.valueOf(0.28454024f), content.get(2).score);
+		assertEquals(Float.valueOf(0.62191015f), content.get(2).score);
 		assertEquals("apache solr", content.get(2).description);
 	}
 

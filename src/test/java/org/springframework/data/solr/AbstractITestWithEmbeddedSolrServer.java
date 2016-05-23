@@ -101,8 +101,9 @@ public abstract class AbstractITestWithEmbeddedSolrServer {
 
 	@AfterClass
 	public static void shutdown() throws SolrServerException, IOException {
+
 		cleanDataInSolr();
-		solrClient.shutdown();
+		solrClient.close();
 	}
 
 	public ExampleSolrBean createDefaultExampleBean() {
